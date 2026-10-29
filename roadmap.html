@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}{{ roadmap.title }} – Career Pilot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<style>
+.stage-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    position: relative;
+    margin: 2rem 0;
+}
+
+.stage-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 20px;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.stage-card {
+    position: relative;
+    padding-left: 55px;
+}
+
+.stage-dot {
+    position: absolute;
+    left: 11px;
+    top: 5px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bg-primary);
+    border: 3px solid var(--accent-primary);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+.stage-inner {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: var(--transition-smooth);
+}
+
+.stage-inner:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.65rem;
+    transition: var(--transition-fast);
+}
+
+.checklist-item.done {
+    background: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.checklist-item.done span {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <a href="{{ url_for('careers.career_detail', career_id=roadmap.career_id) }}" style="color: var(--text-muted); font-size: 0.9rem;">
+        &larr; Back to Career Overview
+    </a>
+</div>
+
+<!-- Roadmap Header -->
+<div class="card" style="margin-bottom: 2.5rem; background: linear-gradient(135deg, rgba(17, 24, 39, 0.9), rgba(30, 41, 59, 0.8));">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
+        <div>
+            <span class="badge badge-cyan">3-Stage Engineering Curriculum</span>
+            <h1 style="font-size: 2.25rem; font-weight: 800; margin-top: 0.35rem;">{{ roadmap.title }}</h1>
+            <p style="color: var(--text-secondary); max-width: 700px; margin-top: 0.5rem; font-size: 1.05rem;">
+                {{ roadmap.description }}
+            </p>
+        </div>
+
+        <div style="text-align: right;">
+            {% if session.get('user_id') %}
+                {% if status == 'Not Enrolled' %}
+                    <form method="POST" action="{{ url_for('roadmaps.enroll', roadmap_id=roadmap.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-primary">Save to My Roadmaps</button>
+                    </form>
+                {% else %}
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">Current Progress</div>
+                    <div style="font-size: 1.75rem; font-weight: 800; color: var(--accent-cyan);">{{ progress_percentage }}%</div>
+                    <span class="badge {% if progress_percentage >= 100 %}badge-emerald{% else %}badge-cyan{% endif %}">{{ status }}</span>
+                {% endif %}
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">Log in to track progress</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if session.get('user_id') and status != 'Not Enrolled' %}
+        <div class="progress-container" style="margin-top: 1.5rem; height: 10px;">
+            <div class="progress-bar-fill" style="width: {{ progress_percentage }}%;"></div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Learning Stages Timeline -->
+<div style="margin-bottom: 3rem;">
+    <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1.5rem;">
+        Course Curriculum & Stage Progressions
+    </h2>
+
+    <div class="stage-timeline">
+        {% for stage in stages %}
+            <div class="stage-card">
+                <div class="stage-dot"></div>
+                <div class="stage-inner">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">
+                            {{ stage.name }} Stage
+                        </h3>
+                        <span class="badge badge-primary">{{ stage.duration }}</span>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Key Focus Topics:</h4>
+                        <ul style="color: var(--text-secondary); margin-left: 1.25rem; font-size: 0.95rem; line-height: 1.8;">
+                            {% for topic in stage.topics %}
+                                <li>{{ topic }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Interactive Progress Checklist -->
+<div class="card" style="margin-bottom: 2.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">
+                ✅ Milestone Progress Checklist
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">
+                Check off items as you complete them to automatically update your enrolled progress.
+            </p>
+        </div>
+        <span class="badge badge-emerald">{{ completed_steps|length }} of {{ checklist|length }} Completed</span>
+    </div>
+
+    {% for item in checklist %}
+        {% set is_checked = item in completed_steps %}
+        <form method="POST" action="{{ url_for('roadmaps.toggle_step') }}" style="margin: 0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="roadmap_id" value="{{ roadmap.id }}">
+            <input type="hidden" name="step_name" value="{{ item }}">
+            <input type="hidden" name="is_completed" value="{% if is_checked %}0{% else %}1{% endif %}">
+
+            <label class="checklist-item {% if is_checked %}done{% endif %}" style="cursor: pointer;" onclick="this.closest('form').submit();">
+                <input type="checkbox" {% if is_checked %}checked{% endif %} style="accent-color: var(--accent-emerald); width: 18px; height: 18px; pointer-events: none;">
+                <span style="font-size: 0.95rem; color: var(--text-primary);">{{ item }}</span>
+            </label>
+        </form>
+    {% endfor %}
+</div>
+
+<!-- Interview Questions & Practice Projects -->
+<div class="grid-2">
+    <div class="card">
+        <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1rem;">
+            🎯 Recommended Portfolio Projects
+        </h3>
+        <ul style="color: var(--text-secondary); margin-left: 1.25rem; font-size: 0.92rem; line-height: 1.8;">
+            {% for proj in projects %}
+                <li>{{ proj }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1rem;">
+            💼 Essential Interview Topics
+        </h3>
+        <ul style="color: var(--text-secondary); margin-left: 1.25rem; font-size: 0.92rem; line-height: 1.8;">
+            {% for topic in interview_topics %}
+                <li>{{ topic }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

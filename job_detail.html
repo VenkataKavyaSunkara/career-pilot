@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} at {{ job.company_name }} – Career Pilot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/jobs.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <a href="{{ url_for('jobs.list_jobs') }}" style="color: var(--text-muted); font-size: 0.9rem;">&larr; Back to Job Listings</a>
+</div>
+
+<div class="demo-disclaimer">
+    ℹ️ <strong>Demonstration Data Reminder:</strong> This vacancy record is stored in your local MySQL database for college project evaluation. Application actions represent a simulated student workflow.
+</div>
+
+<div class="card" style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div>
+            <span class="badge badge-cyan">{{ job.employment_type }}</span>
+            <h1 style="font-size: 2.25rem; font-weight: 800; margin-top: 0.35rem;">{{ job.title }}</h1>
+            <h3 class="company-name" style="font-size: 1.25rem; margin-top: 0.25rem;">{{ job.company_name }}</h3>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            {% if session.get('user_id') %}
+                <form method="POST" action="{% if is_saved %}{{ url_for('jobs.unsave_job', job_id=job.id) }}{% else %}{{ url_for('jobs.save_job', job_id=job.id) }}{% endif %}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-secondary">
+                        {% if is_saved %}★ Bookmarked{% else %}☆ Save Job{% endif %}
+                    </button>
+                </form>
+            {% endif %}
+
+            <a href="{{ job.application_url or '#' }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                Apply on Demo Portal &nearr;
+            </a>
+        </div>
+    </div>
+
+    <!-- Metadata Grid -->
+    <div class="grid-4" style="padding: 1.25rem 0; border-top: 1px solid rgba(255, 255, 255, 0.08); border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 2rem;">
+        <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Location</div>
+            <div style="font-weight: 600; color: var(--text-primary); margin-top: 0.2rem;">📍 {{ job.location }}</div>
+        </div>
+        <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Experience</div>
+            <div style="font-weight: 600; color: var(--text-primary); margin-top: 0.2rem;">💼 {{ job.experience_level }}</div>
+        </div>
+        <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Education</div>
+            <div style="font-weight: 600; color: var(--text-primary); margin-top: 0.2rem;">🎓 {{ job.required_education }}</div>
+        </div>
+        <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Date Posted</div>
+            <div style="font-weight: 600; color: var(--text-primary); margin-top: 0.2rem;">📅 {{ job.posted_at|format_date }}</div>
+        </div>
+    </div>
+
+    <!-- Personalized Match Breakdown (if logged in) -->
+    {% if match_info %}
+        <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid var(--border-glow); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <h3 style="font-size: 1.1rem; color: var(--accent-cyan); font-weight: 700;">
+                    Personal Profile Match: {{ match_info.relevance_score }}% Fit
+                </h3>
+                <span class="badge badge-emerald">Algorithm Calculated</span>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 0.75rem;">
+                <strong>Why this job matches you:</strong> {{ match_info.match_reasons }}
+            </p>
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.88rem;">
+                {% if match_info.matched_skills %}
+                    <div>
+                        <span style="color: #6ee7b7;">✔ Overlapping Skills:</span>
+                        <strong style="color: #f8fafc;">{{ match_info.matched_skills|join(', ') }}</strong>
+                    </div>
+                {% endif %}
+                {% if match_info.missing_skills %}
+                    <div>
+                        <span style="color: #fda4af;">Missing Skills:</span>
+                        <strong style="color: #f8fafc;">{{ match_info.missing_skills|join(', ') }}</strong>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Full Job Description -->
+    <div style="margin-bottom: 2rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1rem;">Role Description & Responsibilities</h3>
+        <div style="color: var(--text-secondary); line-height: 1.7; font-size: 1rem;">
+            <p>{{ job.description }}</p>
+        </div>
+    </div>
+
+    <!-- Required Skills -->
+    <div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1rem;">Required Technical Competencies</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.6rem;">
+            {% for s in job_skills %}
+                <span class="badge badge-primary" style="padding: 0.4rem 0.8rem; font-size: 0.88rem; text-transform: none;">
+                    {{ s.skill_name }} ({{ s.skill_category }})
+                </span>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}My Student Profile & Skills – Career Pilot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto;">
+    <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="badge badge-primary">Student Profile</span>
+            <h1 style="font-size: 2.25rem; font-weight: 800; margin-top: 0.35rem;">Academic & Career Profile</h1>
+            <p style="color: var(--text-secondary);">
+                Maintain your educational credentials, technical skills inventory, and work preferences.
+            </p>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Profile Completeness</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--accent-cyan);">{{ completion_percentage }}%</div>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('profile.view_profile') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <!-- Academic & Career Background -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                1. Educational Qualifications & Preferences
+            </h3>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="education_level" class="form-label">Education Level</label>
+                    <select name="education_level" id="education_level" class="form-control">
+                        <option value="Undergraduate" {% if profile.education_level == 'Undergraduate' %}selected{% endif %}>Undergraduate (B.Tech / B.E. / BCA / B.Sc)</option>
+                        <option value="Postgraduate" {% if profile.education_level == 'Postgraduate' %}selected{% endif %}>Postgraduate (M.Tech / MCA / M.Sc / MBA)</option>
+                        <option value="Diploma" {% if profile.education_level == 'Diploma' %}selected{% endif %}>Diploma in Engineering / IT</option>
+                        <option value="Doctorate" {% if profile.education_level == 'Doctorate' %}selected{% endif %}>Doctorate / Ph.D.</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="degree" class="form-label">Degree or Course</label>
+                    <input type="text" name="degree" id="degree" class="form-control" placeholder="e.g. B.Tech in Computer Science" value="{{ profile.degree or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="specialization" class="form-label">Specialization / Branch</label>
+                    <input type="text" name="specialization" id="specialization" class="form-control" placeholder="e.g. Artificial Intelligence, Cloud Systems" value="{{ profile.specialization or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="graduation_year" class="form-label">Graduation Year</label>
+                    <input type="number" name="graduation_year" id="graduation_year" class="form-control" placeholder="e.g. 2026" min="1970" max="2040" value="{{ profile.graduation_year or 2026 }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="experience_level" class="form-label">Experience Level</label>
+                    <select name="experience_level" id="experience_level" class="form-control">
+                        <option value="Fresher (0-1 yrs)" {% if profile.experience_level == 'Fresher (0-1 yrs)' %}selected{% endif %}>Fresher (0-1 yrs)</option>
+                        <option value="1-2 years" {% if profile.experience_level == '1-2 years' %}selected{% endif %}>1-2 years</option>
+                        <option value="Student / Intern" {% if profile.experience_level == 'Student / Intern' %}selected{% endif %}>Student / Intern</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="preferred_location" class="form-label">Preferred Work Location</label>
+                    <input type="text" name="preferred_location" id="preferred_location" class="form-control" placeholder="e.g. Bangalore / Remote" value="{{ profile.preferred_location or '' }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="career_interests" class="form-label">Career Interests (Keywords)</label>
+                <input type="text" name="career_interests" id="career_interests" class="form-control" placeholder="e.g. Python Developer, Machine Learning, Web Development" value="{{ profile.career_interests or '' }}">
+                <small style="color: var(--text-muted); font-size: 0.8rem;">Used by our recommendation engine to match domain interest keywords.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="career_goals" class="form-label">Career Goals & Aspirations</label>
+                <textarea name="career_goals" id="career_goals" class="form-control" rows="3" placeholder="Briefly describe your dream role, targets, or industry passions...">{{ profile.career_goals or '' }}</textarea>
+            </div>
+        </div>
+
+        <!-- Skills Selection -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0;">
+                    2. Technical & Soft Skills Inventory
+                </h3>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">
+                    Selected: <strong>{{ user_skills|length }}</strong> skills
+                </span>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                Select all technologies, frameworks, and tools you have practiced. These directly inform career match scores and skill gap calculations.
+            </p>
+
+            {% for category, skills in skills_by_category.items() %}
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="font-size: 0.95rem; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem;">
+                        {{ category }}
+                    </h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.65rem;">
+                        {% for s in skills %}
+                            <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+                                <input type="checkbox" name="skills" value="{{ s.id }}" {% if s.id in user_skill_ids %}checked{% endif %} style="accent-color: var(--accent-primary); width: 16px; height: 16px;">
+                                <span style="font-size: 0.9rem; color: var(--text-primary);">{{ s.skill_name }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-bottom: 3rem;">
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary" style="padding-left: 2rem; padding-right: 2rem;">
+                Save Profile & Update Skills
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard – Career Pilot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/careers.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/jobs.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div>
+        <h1 class="welcome-title"><span id="timeGreeting">Hello</span>, {{ profile.full_name or session.get('user_name', 'Student') }}!</h1>
+        <p class="welcome-sub">
+            Track your career assessment scores, technical readiness, and job bookmarks in one centralized hub.
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <a href="{{ url_for('assessment.take_assessment') }}" class="btn btn-primary btn-sm">
+            🎯 Retake Assessment
+        </a>
+        <a href="{{ url_for('profile.view_profile') }}" class="btn btn-secondary btn-sm">
+            ✏️ Edit Profile
+        </a>
+    </div>
+</div>
+
+<!-- Stats / Profile Progress Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon icon-purple">👤</div>
+        <div class="stat-content" style="flex: 1;">
+            <h4>Profile Completeness</h4>
+            <div class="stat-number">{{ completion_percentage }}%</div>
+            <div class="progress-container">
+                <div class="progress-bar-fill" data-width="{{ completion_percentage }}%" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-cyan">⭐</div>
+        <div class="stat-content">
+            <h4>Career Matches</h4>
+            <div class="stat-number">{{ recommendations|length }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Evaluated Roles</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-amber">★</div>
+        <div class="stat-content">
+            <h4>Saved Jobs</h4>
+            <div class="stat-number">{{ saved_jobs|length }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Bookmarked Demo Jobs</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-emerald">🗺️</div>
+        <div class="stat-content">
+            <h4>Active Roadmaps</h4>
+            <div class="stat-number">{{ saved_roadmaps|length }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Enrolled Tracks</div>
+        </div>
+    </div>
+</div>
+
+<!-- Section: Top Career Recommendations -->
+<section class="dashboard-section">
+    <div class="section-head">
+        <div>
+            <h3>Top Career Recommendations</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">Calculated using your skills, assessment responses, and academic profile.</p>
+        </div>
+        <a href="{{ url_for('careers.recommendations') }}" class="btn btn-secondary btn-sm">View All Recommendations &rarr;</a>
+    </div>
+
+    {% if recommendations %}
+        <div class="grid-3">
+            {% for rec in recommendations %}
+                <div class="card career-card">
+                    <div>
+                        <div class="career-header">
+                            <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">{{ rec.career_title }}</h4>
+                            <span class="match-score-badge {% if rec.match_score >= 75 %}match-high{% elif rec.match_score >= 50 %}match-mid{% else %}match-low{% endif %}">
+                                {{ rec.match_score }}% Match
+                            </span>
+                        </div>
+                        <p class="career-desc">{{ rec.career_description }}</p>
+                        
+                        <div style="background: rgba(99, 102, 241, 0.08); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.85rem; color: #a5b4fc; margin-bottom: 1rem;">
+                            💡 <strong>Why:</strong> {{ rec.recommendation_reason or 'Strong domain alignment' }}
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <a href="{{ url_for('careers.skill_gap', career_id=rec.career_id) }}" class="btn btn-primary btn-sm" style="flex: 1;">
+                            Skill Gap
+                        </a>
+                        <a href="{{ url_for('roadmaps.view_by_career', career_id=rec.career_id) }}" class="btn btn-secondary btn-sm" style="flex: 1;">
+                            Roadmap
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🎯</div>
+            <h4>You haven't completed the career assessment yet</h4>
+            <p>Take our quick assessment to calculate match percentages across 10 technology fields.</p>
+            <a href="{{ url_for('assessment.take_assessment') }}" class="btn btn-primary">Start Career Assessment</a>
+        </div>
+    {% endif %}
+</section>
+
+<!-- Section: Recommended Jobs -->
+<section class="dashboard-section">
+    <div class="section-head">
+        <div>
+            <h3>Recommended Jobs for Your Skillset</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">Demonstration opportunities ranked by required skill overlap.</p>
+        </div>
+        <a href="{{ url_for('jobs.list_jobs') }}" class="btn btn-secondary btn-sm">Browse All Jobs &rarr;</a>
+    </div>
+
+    {% if recommended_jobs %}
+        <div class="grid-2">
+            {% for job in recommended_jobs %}
+                <div class="card job-card" style="margin-bottom: 0;">
+                    <div class="job-card-header">
+                        <div>
+                            <a href="{{ url_for('jobs.job_detail', job_id=job.id) }}" class="job-title-link">{{ job.title }}</a>
+                            <div class="company-name">{{ job.company_name }}</div>
+                        </div>
+                        <span class="badge {% if job.relevance_score >= 70 %}badge-emerald{% else %}badge-cyan{% endif %}">
+                            {{ job.relevance_score }}% Match
+                        </span>
+                    </div>
+                    <div class="job-meta-row">
+                        <div class="job-meta-item">📍 {{ job.location }}</div>
+                        <div class="job-meta-item">💼 {{ job.experience_level }}</div>
+                    </div>
+                    <p class="job-desc-snippet">{{ job.description }}</p>
+                    <div class="job-card-footer">
+                        <span style="font-size: 0.82rem; color: var(--text-muted);">{{ job.match_reasons }}</span>
+                        <a href="{{ url_for('jobs.job_detail', job_id=job.id) }}" class="btn btn-secondary btn-sm">Details</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>No job recommendations available yet. Update your skills in your profile to trigger job matching.</p>
+            <a href="{{ url_for('profile.view_profile') }}" class="btn btn-secondary btn-sm">Update Skills</a>
+        </div>
+    {% endif %}
+</section>
+
+<!-- Section: Saved Roadmaps & Assessment History Grid -->
+<div class="grid-2" style="margin-bottom: 2.5rem;">
+    <!-- Active Roadmaps -->
+    <div class="card">
+        <div class="section-head">
+            <h3>Active Learning Roadmaps</h3>
+            <a href="{{ url_for('careers.list_careers') }}" style="font-size: 0.85rem; color: var(--accent-cyan);">Browse Tracks</a>
+        </div>
+
+        {% if saved_roadmaps %}
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                {% for r in saved_roadmaps %}
+                    <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <h4 style="font-size: 1rem; color: var(--text-primary);">{{ r.roadmap_title }}</h4>
+                            <span class="badge {% if r.progress_percentage >= 100 %}badge-emerald{% else %}badge-cyan{% endif %}">
+                                {{ r.progress_percentage }}%
+                            </span>
+                        </div>
+                        <div class="progress-container" style="margin-bottom: 0.75rem;">
+                            <div class="progress-bar-fill" data-width="{{ r.progress_percentage }}%" style="width: 0%;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.82rem; color: var(--text-muted);">Status: {{ r.status }}</span>
+                            <a href="{{ url_for('roadmaps.view_roadmap', roadmap_id=r.roadmap_id) }}" class="btn btn-secondary btn-sm">Continue Learning &rarr;</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state" style="padding: 2rem 1rem;">
+                <p>You have not enrolled in any learning roadmaps yet.</p>
+                <a href="{{ url_for('careers.list_careers') }}" class="btn btn-secondary btn-sm">Explore Roadmaps</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Assessment Milestones -->
+    <div class="card">
+        <div class="section-head">
+            <h3>Assessment History</h3>
+            <a href="{{ url_for('assessment.history') }}" style="font-size: 0.85rem; color: var(--accent-cyan);">Full History</a>
+        </div>
+
+        {% if assessments %}
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for a in assessments[:4] %}
+                    <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">Assessment #{{ a.id }}</div>
+                            <div style="font-size: 0.82rem; color: var(--text-muted);">Completed: {{ a.completed_at|format_date('%b %d, %Y - %I:%M %p') }}</div>
+                        </div>
+                        <a href="{{ url_for('assessment.view_past_assessment', assessment_id=a.id) }}" class="btn btn-secondary btn-sm">Review Results</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state" style="padding: 2rem 1rem;">
+                <p>No assessment submissions logged yet.</p>
+                <a href="{{ url_for('assessment.take_assessment') }}" class="btn btn-primary btn-sm">Take First Assessment</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}{{ career.title }} – Career Overview & Roadmap{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/careers.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/jobs.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <a href="{{ url_for('careers.list_careers') }}" style="color: var(--text-muted); font-size: 0.9rem;">&larr; Back to All Careers</a>
+</div>
+
+<div class="card" style="margin-bottom: 2.5rem; background: linear-gradient(135deg, rgba(17, 24, 39, 0.9), rgba(30, 41, 59, 0.8));">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div>
+            <span class="badge badge-primary">Industry Trajectory</span>
+            <h1 style="font-size: 2.5rem; font-weight: 800; margin-top: 0.5rem;">{{ career.title }}</h1>
+            <p style="color: var(--text-secondary); max-width: 750px; font-size: 1.05rem; margin-top: 0.5rem;">
+                {{ career.description }}
+            </p>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <a href="{{ url_for('careers.skill_gap', career_id=career.id) }}" class="btn btn-primary">
+                📊 Check My Skill Gap
+            </a>
+            {% if roadmap %}
+                <a href="{{ url_for('roadmaps.view_roadmap', roadmap_id=roadmap.id) }}" class="btn btn-cyan">
+                    🗺️ Open Learning Roadmap
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid-3" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+        <div>
+            <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Required Education</h4>
+            <p style="color: var(--text-primary); font-size: 0.95rem; margin-top: 0.25rem;">{{ career.required_education }}</p>
+        </div>
+        <div>
+            <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Entry-Level Positions</h4>
+            <p style="color: var(--text-primary); font-size: 0.95rem; margin-top: 0.25rem;">{{ career.entry_level_roles }}</p>
+        </div>
+        <div>
+            <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Curated Roadmap</h4>
+            <p style="color: var(--text-primary); font-size: 0.95rem; margin-top: 0.25rem;">3 Stages (Beginner to Advanced)</p>
+        </div>
+    </div>
+</div>
+
+<!-- Required Competencies / Skills -->
+<div class="card" style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--text-primary);">
+        Core Competencies & Technologies Required
+    </h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem;">
+        {% for s in skills %}
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h4 style="font-size: 0.95rem; color: var(--text-primary);">{{ s.skill_name }}</h4>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">{{ s.skill_category }}</span>
+                </div>
+                {% if s.importance_level == 'High' %}
+                    <span class="badge badge-rose">High Priority</span>
+                {% elif s.importance_level == 'Medium' %}
+                    <span class="badge badge-amber">Medium</span>
+                {% else %}
+                    <span class="badge badge-primary">Foundational</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Demonstration Jobs Matching this Career -->
+<div style="margin-bottom: 2.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h2 style="font-size: 1.35rem; font-weight: 700;">Matching Demonstration Job Openings</h2>
+        <a href="{{ url_for('jobs.list_jobs', keyword=career.title.split()[0]) }}" class="btn btn-secondary btn-sm">Search All Matching Jobs</a>
+    </div>
+
+    {% if related_jobs %}
+        <div class="grid-2">
+            {% for job in related_jobs %}
+                <div class="card job-card">
+                    <div class="job-card-header">
+                        <div>
+                            <a href="{{ url_for('jobs.job_detail', job_id=job.id) }}" class="job-title-link">{{ job.title }}</a>
+                            <div class="company-name">{{ job.company_name }}</div>
+                        </div>
+                        <span class="badge badge-cyan">{{ job.employment_type }}</span>
+                    </div>
+                    <div class="job-meta-row">
+                        <div class="job-meta-item">📍 {{ job.location }}</div>
+                        <div class="job-meta-item">💼 {{ job.experience_level }}</div>
+                    </div>
+                    <p class="job-desc-snippet">{{ job.description }}</p>
+                    <div class="job-card-footer">
+                        <a href="{{ url_for('jobs.job_detail', job_id=job.id) }}" class="btn btn-secondary btn-sm">View Demo Listing</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>No active demonstration vacancies currently tagged for this exact role title.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

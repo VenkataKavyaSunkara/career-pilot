@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Demonstration Job Board – Career Pilot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/jobs.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="badge badge-cyan">Predefined Database</span>
+            <h1 style="font-size: 2.25rem; font-weight: 800; margin-top: 0.35rem;">
+                {% if is_recommended_view %}Top Matched Jobs for You{% else %}Demonstration Job Listings{% endif %}
+            </h1>
+            <p style="color: var(--text-secondary); max-width: 650px;">
+                Curated role vacancies stored in MySQL to test skill matching algorithms and student bookmarking workflows.
+            </p>
+        </div>
+        {% if session.get('user_id') and not is_recommended_view %}
+            <a href="{{ url_for('jobs.recommended_jobs') }}" class="btn btn-primary btn-sm">
+                🎯 View Personalized Job Matches
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="demo-disclaimer">
+    ℹ️ <strong>Academic Demonstration Notice:</strong> The job listings displayed below are realistic sample records stored in your local MySQL database for college project demonstration. They are not active real-world hiring vacancies.
+</div>
+
+<div class="jobs-layout">
+    <!-- Filter Sidebar -->
+    <aside class="filters-sidebar">
+        <form method="GET" action="{{ url_for('jobs.list_jobs') }}" id="jobsFilterForm">
+            <div class="filters-header">
+                <h4>Filter Jobs</h4>
+                <a href="{{ url_for('jobs.list_jobs') }}" style="font-size: 0.82rem; color: var(--accent-cyan);">Clear All</a>
+            </div>
+
+            <!-- Keyword Search -->
+            <div class="filter-group">
+                <label for="keyword">Search Keyword</label>
+                <input type="text" name="keyword" id="keyword" class="form-control" placeholder="e.g. Python, Analyst, React" value="{{ keyword }}">
+            </div>
+
+            <!-- Location -->
+            <div class="filter-group">
+                <label for="location">Location</label>
+                <input type="text" name="location" id="location" class="form-control" placeholder="e.g. Bangalore, Remote" value="{{ location }}">
+            </div>
+
+            <!-- Experience Level -->
+            <div class="filter-group">
+                <label for="experience">Experience Level</label>
+                <select name="experience" id="experience" class="form-control filter-select">
+                    <option value="">All Experience Levels</option>
+                    <option value="Fresher (0-1 yrs)" {% if experience == 'Fresher (0-1 yrs)' %}selected{% endif %}>Fresher (0-1 yrs)</option>
+                    <option value="1-2 years" {% if experience == '1-2 years' %}selected{% endif %}>1-2 years</option>
+                </select>
+            </div>
+
+            <!-- Employment Type -->
+            <div class="filter-group">
+                <label for="employment_type">Employment Type</label>
+                <select name="employment_type" id="employment_type" class="form-control filter-select">
+                    <option value="">All Types</option>
+                    <option value="Full-time" {% if employment_type == 'Full-time' %}selected{% endif %}>Full-time</option>
+                    <option value="Contract" {% if employment_type == 'Contract' %}selected{% endif %}>Contract</option>
+                    <option value="Internship" {% if employment_type == 'Internship' %}selected{% endif %}>Internship</option>
+                </select>
+            </div>
+
+            <!-- Required Skill -->
+            <div class="filter-group">
+                <label for="skill_id">Required Skill</label>
+                <select name="skill_id" id="skill_id" class="form-control filter-select">
+                    <option value="">All Skills</option>
+                    {% for s in all_skills %}
+                        <option value="{{ s.id }}" {% if skill_id == s.id|string %}selected{% endif %}>{{ s.skill_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-sm" style="margin-top: 1rem;">Apply Filters</button>
+        </form>
+    </aside>
+
+    <!-- Jobs Stream -->
+    <main>
+        {% if jobs %}
+            <div style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+                Showing <strong>{{ jobs|length }}</strong> available listings
+            </div>
+
+            {% for job in jobs %}
+                <div class="job-card">
+                    <div class="job-card-header">
+                        <div>
+                            <a href="{{ url_for('jobs.job_detail', job_id=job.id) }}" class="job-title-link">{{ job.title }}</a>
+                            <div class="company-name">{{ job.company_name }}</div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            {% if job.relevance_score %}
+                                <span class="badge {% if job.relevance_score >= 70 %}badge-emerald{% elif job.relevance_score >= 50 %}badge-cyan{% else %}badge-amber{% endif %}">
+                                    {{ job.relevance_score }}% Fit
+                                </span>
+                            {% endif %}
+                            
+                            {% if session.get('user_id') %}
+                                <form method="POST" action="{% if job.is_saved %}{{ url_for('jobs.unsave_job', job_id=job.id) }}{% else %}{{ url_for('jobs.save_job', job_id=job.id) }}{% endif %}" style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="bookmark-btn {% if job.is_saved %}saved{% endif %}" title="{% if job.is_saved %}Remove Bookmark{% else %}Bookmark Job{% endif %}">
+                                        {% if job.is_saved %}★{% else %}☆{% endif %}
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="job-meta-row">
+                        <div class="job-meta-item">📍 {{ job.location }}</div>
+                        <div class="job-meta-item">💼 {{ job.experience_level }}</div>
+                        <div class="job-meta-item">🕒 {{ job.employment_type }}</div>
+                        <div class="job-meta-item">🎓 {{ job.required_education }}</div>
+                    </div>
+
+                    <p class="job-desc-snippet">{{ job.description }}</p>
+
+                    {% if job.match_reasons %}
+                        <div style="background: rgba(99, 102, 241, 0.08); border-left: 3px solid var(--accent-primary); padding: 0.5rem 0.75rem; font-size: 0.85rem; color: #a5b4fc; margin-bottom: 1rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;">
+                            💡 <strong>Match Justification:</strong> {{ job.match_reasons }}
+                        </div>
+                    {% endif %}
+
+                    <div class="job-card-footer">
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;">
+                            <span style="font-size: 0.78rem; color: var(--text-muted); margin-right: 0.25rem;">Skills:</span>
+                            {% for s in job.skills %}
+                                <span class="badge badge-primary" style="font-size: 0.75rem; text-transform: none;">{{ s.skill_name }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <a href="{{ url_for('jobs.job_detail', job_id=job.id) }}" class="btn btn-secondary btn-sm">
+                            View Details &rarr;
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <h4>No jobs match your current filters</h4>
+                <p>Try clearing some criteria or searching for broader terms like "Python", "SQL", or "Remote".</p>
+                <a href="{{ url_for('jobs.list_jobs') }}" class="btn btn-secondary btn-sm">Reset All Filters</a>
+            </div>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/jobs.js') }}"></script>
+{% endblock %}

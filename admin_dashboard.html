@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Dashboard – Career Pilot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <span class="badge badge-amber">Admin Control Center</span>
+        <h1 style="font-size: 2.25rem; font-weight: 800; margin-top: 0.35rem;">Platform Administration</h1>
+        <p style="color: var(--text-secondary);">
+            Manage demonstration data, catalog pathways, job postings, and review operational audit logs.
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('admin.manage_careers') }}" class="btn btn-primary btn-sm">Manage Careers</a>
+        <a href="{{ url_for('admin.manage_jobs') }}" class="btn btn-cyan btn-sm">Manage Jobs</a>
+    </div>
+</div>
+
+<!-- Admin Metrics Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon icon-purple">👥</div>
+        <div class="stat-content">
+            <h4>Total Users</h4>
+            <div class="stat-number">{{ stats.total_users }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">{{ stats.total_students }} Students</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-cyan">🎯</div>
+        <div class="stat-content">
+            <h4>Assessments</h4>
+            <div class="stat-number">{{ stats.total_assessments }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Completed Submissions</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-emerald">💼</div>
+        <div class="stat-content">
+            <h4>Demo Jobs</h4>
+            <div class="stat-number">{{ stats.total_jobs }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">{{ stats.total_saved_jobs }} Total Bookmarks</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-amber">🗺️</div>
+        <div class="stat-content">
+            <h4>Career Paths</h4>
+            <div class="stat-number">{{ stats.total_careers }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">{{ stats.total_roadmaps }} Roadmaps</div>
+        </div>
+    </div>
+</div>
+
+<!-- Audit Log Stream -->
+<div class="card">
+    <div class="section-head">
+        <h3>Administrative Audit Trail</h3>
+        <span class="badge badge-primary">Recent 25 Actions</span>
+    </div>
+
+    {% if audit_logs %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+                        <th style="padding: 0.75rem 1rem;">Timestamp</th>
+                        <th style="padding: 0.75rem 1rem;">Admin</th>
+                        <th style="padding: 0.75rem 1rem;">Action</th>
+                        <th style="padding: 0.75rem 1rem;">Target Entity</th>
+                        <th style="padding: 0.75rem 1rem;">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in audit_logs %}
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.04);">
+                            <td style="padding: 0.85rem 1rem; color: var(--text-muted); white-space: nowrap;">
+                                {{ log.created_at|format_date('%Y-%m-%d %H:%M') }}
+                            </td>
+                            <td style="padding: 0.85rem 1rem; color: var(--text-primary); font-weight: 600;">
+                                {{ log.admin_name or 'System' }}
+                            </td>
+                            <td style="padding: 0.85rem 1rem;">
+                                <span class="badge badge-cyan">{{ log.action }}</span>
+                            </td>
+                            <td style="padding: 0.85rem 1rem; color: var(--text-secondary);">
+                                {{ log.entity_type }} #{{ log.entity_id or '-' }}
+                            </td>
+                            <td style="padding: 0.85rem 1rem; color: var(--text-secondary);">
+                                {{ log.details or '-' }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state" style="padding: 2rem 1rem;">
+            <p>No administrative audit entries logged yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

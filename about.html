@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}About – Career Pilot Mini Project{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <span class="badge badge-primary">College Mini-Project Documentation</span>
+        <h1 style="font-size: 2.75rem; font-weight: 800; margin-top: 0.5rem; margin-bottom: 1rem;">
+            About <span style="background: linear-gradient(90deg, #818cf8, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Career Pilot</span>
+        </h1>
+        <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6;">
+            A complete full-stack web application designed to bridge the gap between academic education and industry requirements for students and entry-level job seekers.
+        </p>
+    </div>
+
+    <!-- Project Overview Card -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.4rem; color: var(--accent-cyan); margin-bottom: 1rem;">1. Project Overview & Scope</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+            Many graduating students face uncertainty regarding which career pathway aligns best with their specific programming skills, coursework, and personal problem-solving style. <strong>Career Pilot</strong> provides an interactive self-assessment platform backed by deterministic, transparent algorithms that evaluate suitability across 10 specialized technology careers.
+        </p>
+        <p style="color: var(--text-secondary);">
+            The system operates 100% locally with zero external API dependencies, ensuring reliability, data privacy, and beginner-friendly maintainability for college project examinations.
+        </p>
+    </div>
+
+    <!-- Recommendation Methodology -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.4rem; color: var(--accent-cyan); margin-bottom: 1rem;">2. Transparent Recommendation Formulas</h2>
+        
+        <h3 style="font-size: 1.1rem; color: var(--text-primary); margin-top: 1rem; margin-bottom: 0.5rem;">A. Career Match Score Formula (0 to 100%)</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem;">
+            Suitability scores are computed through three documented weighted criteria:
+        </p>
+        <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: var(--radius-md); font-family: monospace; font-size: 0.9rem; margin-bottom: 1rem; color: #a5b4fc;">
+            Career Score = (Skill Match × 40%) + (Questionnaire Affinity × 35%) + (Profile & Degree Match × 25%)
+        </div>
+        <ul style="color: var(--text-secondary); margin-left: 1.5rem; font-size: 0.95rem; margin-bottom: 1.5rem;">
+            <li><strong>Skill Match (40%):</strong> Weighted overlap of possessed skills with career required competencies (High importance = 3 pts, Medium = 2 pts, Low = 1 pt).</li>
+            <li><strong>Questionnaire Affinity (35%):</strong> Quantitative alignment with student answers regarding domain excitement, daily tasks, and problem-solving style.</li>
+            <li><strong>Profile & Degree (25%):</strong> Relevance of academic specialization, graduation timeline, and career goal keywords.</li>
+        </ul>
+
+        <h3 style="font-size: 1.1rem; color: var(--text-primary); margin-top: 1rem; margin-bottom: 0.5rem;">B. Job Relevance Score Formula (0 to 100%)</h3>
+        <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: var(--radius-md); font-family: monospace; font-size: 0.9rem; margin-bottom: 1rem; color: #6ee7b7;">
+            Job Relevance = (Skill Overlap × 50%) + (Role Title Match × 25%) + (Location Fit × 15%) + (Experience Fit × 10%)
+        </div>
+    </div>
+
+    <!-- Technical Architecture -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.4rem; color: var(--accent-cyan); margin-bottom: 1rem;">3. Technology Stack</h2>
+        <div class="grid-2">
+            <div>
+                <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;">Backend Engine</h4>
+                <ul style="color: var(--text-secondary); font-size: 0.9rem; margin-left: 1.25rem;">
+                    <li>Python 3 & Flask Framework</li>
+                    <li>Flask Blueprints for Modular Routing</li>
+                    <li>MySQL Relational Database (15 tables)</li>
+                    <li>mysql-connector-python & PyMySQL</li>
+                    <li>Werkzeug Password Hashing</li>
+                    <li>Native Session-Based Authentication</li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;">Frontend Interface</h4>
+                <ul style="color: var(--text-secondary); font-size: 0.9rem; margin-left: 1.25rem;">
+                    <li>Semantic HTML5 & Jinja2 Templates</li>
+                    <li>Vanilla CSS3 with Glassmorphic Design</li>
+                    <li>Custom CSS Variable Design System</li>
+                    <li>Modular Vanilla JavaScript (ES6+)</li>
+                    <li>Zero Heavy External Framework Overhead</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Academic Disclaimer -->
+    <div class="demo-disclaimer" style="font-size: 0.9rem; line-height: 1.6;">
+        <strong>Academic Project Guidance Notice:</strong> Career Pilot is developed for educational and academic project presentation purposes. Career match recommendations, roadmap stages, and demonstration job vacancies are curated illustrative examples designed to assist students with self-assessment and mock interview preparation.
+    </div>
+</div>
+{% endblock %}

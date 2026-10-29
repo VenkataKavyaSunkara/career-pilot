@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Tech Careers – Career Pilot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/careers.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <span class="badge badge-primary">Catalog</span>
+        <h1 style="font-size: 2.25rem; font-weight: 800; margin-top: 0.35rem;">Technology Career Pathways</h1>
+        <p style="color: var(--text-secondary); max-width: 650px;">
+            Browse structured career trajectories in modern software engineering, data science, cybersecurity, and design.
+        </p>
+    </div>
+    {% if session.get('user_id') %}
+        <a href="{{ url_for('careers.recommendations') }}" class="btn btn-cyan btn-sm">⭐ View My Recommendations</a>
+    {% endif %}
+</div>
+
+<!-- Assessment Prompt Callout -->
+<div class="card" style="margin-bottom: 2.5rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(6, 182, 212, 0.12)); border-color: var(--border-glow);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+        <div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.35rem;">Unsure which career matches your current skillset?</h3>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">Take our comprehensive 5-minute career assessment to compute your personal suitability ranking.</p>
+        </div>
+        <a href="{{ url_for('assessment.take_assessment') }}" class="btn btn-primary">Take Career Assessment &rarr;</a>
+    </div>
+</div>
+
+<div class="grid-3">
+    {% for career in careers %}
+        <div class="card career-card">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <span class="badge badge-cyan">Specialization</span>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Career #{{ career.id }}</span>
+                </div>
+                <h2 class="career-title" style="margin-bottom: 0.75rem;">{{ career.title }}</h2>
+                <p class="career-desc">{{ career.description }}</p>
+
+                <div style="margin-bottom: 1.25rem;">
+                    <div style="font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem;">Typical Entry Roles:</div>
+                    <div style="font-size: 0.88rem; color: var(--text-secondary);">{{ career.entry_level_roles }}</div>
+                </div>
+            </div>
+
+            <div style="padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; gap: 0.65rem;">
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="{{ url_for('careers.career_detail', career_id=career.id) }}" class="btn btn-secondary btn-sm" style="flex: 1;">Details</a>
+                    <a href="{{ url_for('careers.skill_gap', career_id=career.id) }}" class="btn btn-primary btn-sm" style="flex: 1;">Skill Gap</a>
+                </div>
+                <a href="{{ url_for('roadmaps.view_by_career', career_id=career.id) }}" class="btn btn-secondary btn-sm" style="width: 100%; border-style: dashed;">
+                    🗺️ Learning Roadmap
+                </a>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

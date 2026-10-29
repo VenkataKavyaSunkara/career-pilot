@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Career Assessment Questionnaire – Career Pilot{% endblock %}
+
+{% block extra_css %}
+<style>
+.question-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 2rem;
+    margin-bottom: 2rem;
+    transition: var(--transition-smooth);
+}
+
+.question-block:focus-within {
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+}
+
+.question-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.35rem;
+}
+
+.question-desc {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+}
+
+.options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.option-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1.25rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.option-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.option-card.selected, .option-card:has(input:checked) {
+    background: rgba(99, 102, 241, 0.12);
+    border-color: var(--accent-primary);
+}
+
+.option-card input[type="radio"] {
+    accent-color: var(--accent-primary);
+    width: 18px;
+    height: 18px;
+}
+
+.option-text {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.option-card:has(input:checked) .option-text {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+        <span class="badge badge-primary">Interactive Self-Discovery</span>
+        <h1 style="font-size: 2.5rem; font-weight: 800; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+            Career Guidance Assessment
+        </h1>
+        <p style="color: var(--text-secondary); font-size: 1.05rem;">
+            Answer the 5 behavioral and technical questions below. Our rule-based recommendation engine calculates your affinity score across 10 technology career fields.
+        </p>
+
+        <!-- Dynamic Live Progress Indicator -->
+        <div style="margin-top: 1.5rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.35rem;">
+                <span id="assessmentProgressText">0 of {{ questions|length }} Completed (0%)</span>
+                <span>Rule-Based Scored</span>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.08); height: 8px; border-radius: var(--radius-full); overflow: hidden;">
+                <div id="assessmentProgressFill" style="background: linear-gradient(90deg, var(--accent-primary), var(--accent-cyan)); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('assessment.take_assessment') }}" id="assessmentForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        {% for q in questions %}
+            <div class="question-block" id="block-{{ q.id }}">
+                <h3 class="question-title">{{ q.title }}</h3>
+                <p class="question-desc">{{ q.description }}</p>
+
+                <div class="options-grid">
+                    {% for opt_val, opt_label in q.options %}
+                        <label class="option-card">
+                            <input type="radio" name="{{ q.id }}" value="{{ opt_val }}" {% if responses.get(q.id) == opt_val %}checked{% endif %} required>
+                            <span class="option-text">{{ opt_label }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+
+        <div style="text-align: center; margin: 3rem 0;">
+            <button type="submit" class="btn btn-primary" style="padding: 0.9rem 2.5rem; font-size: 1.1rem; box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);">
+                🚀 Submit Assessment & Compute Results
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/assessment.js') }}"></script>
+{% endblock %}

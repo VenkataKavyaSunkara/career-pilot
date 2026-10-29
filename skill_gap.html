@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Skill Gap Analysis: {{ analysis.career.title }} – Career Pilot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/careers.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <a href="{{ url_for('careers.career_detail', career_id=analysis.career.id) }}" style="color: var(--text-muted); font-size: 0.9rem;">
+        &larr; Back to {{ analysis.career.title }} Overview
+    </a>
+</div>
+
+<!-- Header / Readiness Gauge -->
+<div class="gap-analysis-header">
+    <div>
+        <span class="badge badge-primary">Technical Competency Audit</span>
+        <h1 style="font-size: 2.25rem; font-weight: 800; margin-top: 0.35rem;">
+            Skill Gap: {{ analysis.career.title }}
+        </h1>
+        <p style="color: var(--text-secondary); max-width: 600px; margin-top: 0.35rem;">
+            Comparing your registered student skills with the industry prerequisites for this career.
+        </p>
+    </div>
+
+    <div class="coverage-gauge">
+        <div class="gauge-number">{{ analysis.coverage_percentage }}%</div>
+        <div class="gauge-label">Readiness Coverage</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+            {{ analysis.possessed_count }} of {{ analysis.total_required }} competencies met
+        </div>
+    </div>
+</div>
+
+<div class="grid-2" style="margin-bottom: 2.5rem;">
+    <!-- Possessed Skills Column -->
+    <div class="card" style="border-top: 3px solid var(--accent-emerald);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <h3 style="font-size: 1.25rem; color: #6ee7b7; font-weight: 700;">
+                ✔ Skills You Possess ({{ analysis.possessed|length }})
+            </h3>
+            <span class="badge badge-emerald">Verified</span>
+        </div>
+
+        {% if analysis.possessed %}
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                {% for s in analysis.possessed %}
+                    <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: var(--radius-md); padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: var(--text-primary); font-size: 0.95rem;">{{ s.name }}</strong>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);">{{ s.category }}</div>
+                        </div>
+                        <span class="badge badge-emerald">{{ s.proficiency }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state" style="padding: 2rem 1rem;">
+                <p>None of the required skills for this role are currently present in your profile.</p>
+                <a href="{{ url_for('profile.view_profile') }}" class="btn btn-secondary btn-sm">Add Skills to Profile</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Missing Skills / Priority Column -->
+    <div class="card" style="border-top: 3px solid var(--accent-rose);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <h3 style="font-size: 1.25rem; color: #fda4af; font-weight: 700;">
+                ⚠️ Skills to Learn ({{ analysis.missing|length }})
+            </h3>
+            <span class="badge badge-rose">Prioritized Gap</span>
+        </div>
+
+        {% if analysis.missing %}
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                {% for s in analysis.missing %}
+                    <div style="background: rgba(244, 63, 94, 0.06); border: 1px solid rgba(244, 63, 94, 0.2); border-radius: var(--radius-md); padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: var(--text-primary); font-size: 0.95rem;">{{ s.name }}</strong>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);">{{ s.category }}</div>
+                        </div>
+                        {% if s.importance == 'High' %}
+                            <span class="badge badge-rose">High Priority</span>
+                        {% elif s.importance == 'Medium' %}
+                            <span class="badge badge-amber">Medium</span>
+                        {% else %}
+                            <span class="badge badge-primary">Recommended</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state" style="padding: 2rem 1rem;">
+                <div class="empty-state-icon">🎉</div>
+                <h4>Complete Skill Match!</h4>
+                <p>You have already acquired all baseline competencies required for this career path.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Recommended Portfolio Practice Projects -->
+{% if analysis.recommended_projects %}
+    <div class="card" style="margin-bottom: 2.5rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1rem;">
+            🛠️ Recommended Portfolio Projects to Bridge the Gap
+        </h3>
+        <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.25rem;">
+            Building these specific projects demonstrates hands-on mastery of missing skills to recruiters and evaluators:
+        </p>
+
+        <div class="grid-3">
+            {% for proj in analysis.recommended_projects %}
+                <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem;">
+                    <div style="font-size: 1.25rem; margin-bottom: 0.5rem;">💻</div>
+                    <h4 style="font-size: 1rem; color: var(--text-primary); margin-bottom: 0.35rem;">Project #{{ loop.index }}</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.88rem;">{{ proj }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<!-- Action Bottom Bar -->
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <a href="{{ url_for('profile.view_profile') }}" class="btn btn-secondary">
+        ✏️ Update My Profile Skills
+    </a>
+    <a href="{{ url_for('roadmaps.view_by_career', career_id=analysis.career.id) }}" class="btn btn-primary">
+        🗺️ Start Learning Roadmap &rarr;
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Saved Jobs & Bookmarks – Career Pilot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/jobs.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <span class="badge badge-amber">Bookmarks</span>
+        <h1 style="font-size: 2.25rem; font-weight: 800; margin-top: 0.35rem;">Saved Demonstration Jobs</h1>
+        <p style="color: var(--text-secondary); max-width: 600px;">
+            Manage the vacancies you have bookmarked for review, skill gap auditing, or mock applications.
+        </p>
+    </div>
+    <a href="{{ url_for('jobs.list_jobs') }}" class="btn btn-secondary btn-sm">Explore More Jobs &rarr;</a>
+</div>
+
+{% if jobs %}
+    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+        {% for job in jobs %}
+            <div class="job-card">
+                <div class="job-card-header">
+                    <div>
+                        <a href="{{ url_for('jobs.job_detail', job_id=job.id) }}" class="job-title-link">{{ job.title }}</a>
+                        <div class="company-name">{{ job.company_name }}</div>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('jobs.unsave_job', job_id=job.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-secondary btn-sm" style="color: #fda4af;">
+                            Remove Bookmark
+                        </button>
+                    </form>
+                </div>
+
+                <div class="job-meta-row">
+                    <div class="job-meta-item">📍 {{ job.location }}</div>
+                    <div class="job-meta-item">💼 {{ job.experience_level }}</div>
+                    <div class="job-meta-item">🕒 {{ job.employment_type }}</div>
+                    <div class="job-meta-item">📅 Saved: {{ job.saved_at|format_date }}</div>
+                </div>
+
+                <p class="job-desc-snippet">{{ job.description }}</p>
+
+                <div class="job-card-footer">
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;">
+                        <span style="font-size: 0.78rem; color: var(--text-muted); margin-right: 0.25rem;">Skills:</span>
+                        {% for s in job.skills %}
+                            <span class="badge badge-primary" style="font-size: 0.75rem; text-transform: none;">{{ s.skill_name }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <a href="{{ url_for('jobs.job_detail', job_id=job.id) }}" class="btn btn-primary btn-sm">
+                        View Full Details &rarr;
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">★</div>
+        <h4>No saved jobs yet</h4>
+        <p>Browse our demonstration job listings and click the bookmark star to save roles here for quick tracking.</p>
+        <a href="{{ url_for('jobs.list_jobs') }}" class="btn btn-primary">Browse Demonstration Jobs</a>
+    </div>
+{% endif %}
+{% endblock %}

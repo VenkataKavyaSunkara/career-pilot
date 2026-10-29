@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Careers – Admin Panel – Career Pilot{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <a href="{{ url_for('admin.dashboard') }}" style="color: var(--text-muted); font-size: 0.9rem;">&larr; Back to Admin Overview</a>
+        <h1 style="font-size: 2.25rem; font-weight: 800; margin-top: 0.35rem;">Manage Career Profiles</h1>
+        <p style="color: var(--text-secondary);">
+            Add, update, activate, and deactivate technology career paths for student recommendations.
+        </p>
+    </div>
+</div>
+
+<div class="grid-2" style="align-items: start; gap: 2rem;">
+    <!-- Existing Careers Table -->
+    <div class="card" style="padding: 1.5rem;">
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-primary);">
+            Existing Careers Catalog ({{ careers|length }})
+        </h3>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); text-transform: uppercase; font-size: 0.78rem;">
+                        <th style="padding: 0.6rem 0.75rem;">Title</th>
+                        <th style="padding: 0.6rem 0.75rem;">Status</th>
+                        <th style="padding: 0.6rem 0.75rem; text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in careers %}
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.04);">
+                            <td style="padding: 0.75rem;">
+                                <div style="font-weight: 600; color: var(--text-primary);">{{ c.title }}</div>
+                                <div style="font-size: 0.78rem; color: var(--text-muted); max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    {{ c.description }}
+                                </div>
+                            </td>
+                            <td style="padding: 0.75rem;">
+                                {% if c.is_active %}
+                                    <span class="badge badge-emerald">Active</span>
+                                {% else %}
+                                    <span class="badge badge-rose">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 0.75rem; text-align: right;">
+                                <form method="POST" action="{{ url_for('admin.toggle_career', career_id=c.id) }}" style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                        {% if c.is_active %}Deactivate{% else %}Activate{% endif %}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add New Career Form -->
+    <div class="card" style="padding: 1.75rem;">
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent-cyan);">
+            Add New Career Pathway
+        </h3>
+
+        <form method="POST" action="{{ url_for('admin.add_career') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group">
+                <label for="title" class="form-label">Career Title</label>
+                <input type="text" name="title" id="title" class="form-control" placeholder="e.g. Cloud DevOps Engineer" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description" class="form-label">Description</label>
+                <textarea name="description" id="description" class="form-control" rows="3" placeholder="Core overview and role responsibilities..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="required_education" class="form-label">Required Education</label>
+                <input type="text" name="required_education" id="required_education" class="form-control" placeholder="e.g. Bachelor's in CS, IT, or Engineering" required>
+            </div>
+
+            <div class="form-group">
+                <label for="entry_level_roles" class="form-label">Typical Entry-Level Positions</label>
+                <input type="text" name="entry_level_roles" id="entry_level_roles" class="form-control" placeholder="e.g. Junior DevOps Associate, Cloud Intern" required>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--text-primary); font-size: 0.9rem;">
+                    <input type="checkbox" name="is_active" value="1" checked style="accent-color: var(--accent-primary); width: 16px; height: 16px;">
+                    Set as Active Immediately
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Create Career Profile</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

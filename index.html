@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Career Pilot – Smart Career Guidance & Job Recommendation System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-pill">
+        <span>✨</span> Powered by Rule-Based Decision Logic
+    </div>
+    <h1 class="hero-title">
+        Navigate Your Tech Future with <br>
+        <span class="gradient-text">Personalized Career Intelligence</span>
+    </h1>
+    <p class="hero-subtitle">
+        Discover suitable career trajectories, identify missing skill competencies, explore curated learning roadmaps, and match with demonstration job roles tailored to your exact academic profile.
+    </p>
+    <div class="hero-cta">
+        <a href="{{ url_for('assessment.take_assessment') }}" class="btn btn-primary">
+            🚀 Find My Career Path
+        </a>
+        <a href="{{ url_for('jobs.list_jobs') }}" class="btn btn-secondary">
+            💼 Browse Demo Jobs
+        </a>
+    </div>
+</section>
+
+<!-- Key Platform Modules / Benefits -->
+<section style="margin-bottom: 4rem;">
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+        <span class="badge badge-primary">Core Modules</span>
+        <h2 style="font-size: 2rem; margin-top: 0.5rem; font-weight: 700;">How Career Pilot Empowers You</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">A holistic, 4-stage career advancement workflow for college students and graduates.</p>
+    </div>
+
+    <div class="grid-4">
+        <div class="card">
+            <div style="font-size: 2rem; margin-bottom: 1rem;">🎯</div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Career Assessment</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                Answer intuitive domain questions evaluating analytical style, problem solving, and preferred daily engineering activities.
+            </p>
+        </div>
+
+        <div class="card">
+            <div style="font-size: 2rem; margin-bottom: 1rem;">⚖️</div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Rule-Based Matching</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                Transparent algorithms compare your skills and coursework against 10 industry roles with documented percentage formulas.
+            </p>
+        </div>
+
+        <div class="card">
+            <div style="font-size: 2rem; margin-bottom: 1rem;">🔍</div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Skill Gap Analysis</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                Instantly contrast possessed skills with high-priority requirements, highlighting precise learning focus areas.
+            </p>
+        </div>
+
+        <div class="card">
+            <div style="font-size: 2rem; margin-bottom: 1rem;">🗺️</div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Actionable Roadmaps</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                Progress through Beginner, Intermediate, and Advanced stages featuring portfolio projects and interview prep checklists.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Career Catalog Preview -->
+<section style="margin-bottom: 4rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="badge badge-cyan">Explore Opportunities</span>
+            <h2 style="font-size: 2rem; margin-top: 0.5rem; font-weight: 700;">Featured Career Pathways</h2>
+        </div>
+        <a href="{{ url_for('careers.list_careers') }}" class="btn btn-secondary btn-sm">View All 10 Careers &rarr;</a>
+    </div>
+
+    <div class="grid-3">
+        {% for career in careers %}
+            <div class="card career-card">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                        <span class="badge badge-primary">Tech Role</span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Entry-Level Ready</span>
+                    </div>
+                    <h3 class="career-title">{{ career.title }}</h3>
+                    <p class="career-desc">{{ career.description }}</p>
+                </div>
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center;">
+                    <a href="{{ url_for('careers.career_detail', career_id=career.id) }}" class="btn btn-secondary btn-sm">Explore Career</a>
+                    <a href="{{ url_for('roadmaps.view_by_career', career_id=career.id) }}" style="font-size: 0.88rem; font-weight: 600; color: var(--accent-cyan);">View Roadmap &rarr;</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.15)); border: 1px solid var(--border-glow); border-radius: var(--radius-lg); padding: 3.5rem 2rem; text-align: center;">
+    <h2 style="font-size: 2.25rem; font-weight: 800; margin-bottom: 1rem;">Ready to Accelerate Your Career Preparation?</h2>
+    <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 2rem; font-size: 1.05rem;">
+        Join student peers using Career Pilot to audit technical competencies, plan semester roadmaps, and target relevant entry-level roles.
+    </p>
+    {% if session.get('user_id') %}
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Go to Student Dashboard</a>
+    {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Create Free Student Account</a>
+    {% endif %}
+</section>
+{% endblock %}

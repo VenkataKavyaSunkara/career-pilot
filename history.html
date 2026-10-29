@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment History – Career Pilot{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="badge badge-primary">Milestones</span>
+            <h1 style="font-size: 2.25rem; font-weight: 800; margin-top: 0.35rem;">Assessment History</h1>
+            <p style="color: var(--text-secondary);">
+                Review past self-evaluation submissions and tracked recommendation snapshots.
+            </p>
+        </div>
+        <a href="{{ url_for('assessment.take_assessment') }}" class="btn btn-primary btn-sm">
+            🚀 Take New Assessment
+        </a>
+    </div>
+
+    {% if assessments %}
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            {% for a in assessments %}
+                <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.5rem;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem;">
+                            <span class="badge badge-cyan">Evaluation #{{ a.id }}</span>
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">Completed Status: Saved</span>
+                        </div>
+                        <h3 style="font-size: 1.15rem; color: var(--text-primary); margin-top: 0.25rem;">
+                            Questionnaire Submission #{{ a.id }}
+                        </h3>
+                        <p style="color: var(--text-muted); font-size: 0.85rem;">
+                            📅 Timestamp: {{ a.completed_at|format_date('%A, %B %d, %Y at %I:%M %p') }}
+                        </p>
+                    </div>
+
+                    <a href="{{ url_for('assessment.view_past_assessment', assessment_id=a.id) }}" class="btn btn-secondary btn-sm">
+                        View Recommendations Snapshot &rarr;
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <h4>No assessment submissions on record</h4>
+            <p>You have not completed any self-evaluations yet. Take our 5-question questionnaire to generate your first results.</p>
+            <a href="{{ url_for('assessment.take_assessment') }}" class="btn btn-primary">Take Assessment</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

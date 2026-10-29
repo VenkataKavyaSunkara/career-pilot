@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Register Student Account – Career Pilot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Create Account</h2>
+            <p>Join Career Pilot to begin your personalized tech career assessment</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group">
+                <label for="full_name" class="form-label">Full Name</label>
+                <input type="text" name="full_name" id="full_name" class="form-control" placeholder="e.g. Jane Doe" value="{{ full_name or '' }}" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" name="email" id="email" class="form-control" placeholder="e.g. student@college.edu" value="{{ email or '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" name="password" id="password" class="form-control" placeholder="At least 6 characters" minlength="6" required>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password" class="form-label">Confirm Password</label>
+                <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Re-type your password" minlength="6" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">
+                Register & Start Assessment
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Already registered? <a href="{{ url_for('auth.login') }}">Log in to existing account</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

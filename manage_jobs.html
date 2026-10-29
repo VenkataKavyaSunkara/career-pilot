@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Jobs – Admin Panel – Career Pilot{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <a href="{{ url_for('admin.dashboard') }}" style="color: var(--text-muted); font-size: 0.9rem;">&larr; Back to Admin Overview</a>
+    <h1 style="font-size: 2.25rem; font-weight: 800; margin-top: 0.35rem;">Manage Demonstration Jobs</h1>
+    <p style="color: var(--text-secondary);">
+        Add, review, and toggle demonstration job vacancies stored in your local MySQL database.
+    </p>
+</div>
+
+<div class="grid-2" style="align-items: start; gap: 2rem;">
+    <!-- Existing Jobs Table -->
+    <div class="card" style="padding: 1.5rem;">
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-primary);">
+            Demonstration Job Catalog ({{ jobs|length }})
+        </h3>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); text-transform: uppercase; font-size: 0.78rem;">
+                        <th style="padding: 0.6rem 0.75rem;">Role / Company</th>
+                        <th style="padding: 0.6rem 0.75rem;">Status</th>
+                        <th style="padding: 0.6rem 0.75rem; text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for j in jobs %}
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.04);">
+                            <td style="padding: 0.75rem;">
+                                <div style="font-weight: 600; color: var(--text-primary);">{{ j.title }}</div>
+                                <div style="font-size: 0.8rem; color: #818cf8;">{{ j.company_name }} &bull; {{ j.location }}</div>
+                            </td>
+                            <td style="padding: 0.75rem;">
+                                {% if j.is_active %}
+                                    <span class="badge badge-emerald">Active</span>
+                                {% else %}
+                                    <span class="badge badge-rose">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 0.75rem; text-align: right;">
+                                <form method="POST" action="{{ url_for('admin.toggle_job', job_id=j.id) }}" style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                        {% if j.is_active %}Deactivate{% else %}Activate{% endif %}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Job Form -->
+    <div class="card" style="padding: 1.75rem;">
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent-cyan);">
+            Post Demonstration Job
+        </h3>
+
+        <form method="POST" action="{{ url_for('admin.add_job') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group">
+                <label for="title" class="form-label">Job Title</label>
+                <input type="text" name="title" id="title" class="form-control" placeholder="e.g. Associate Backend Engineer" required>
+            </div>
+
+            <div class="form-group">
+                <label for="company_name" class="form-label">Company Name</label>
+                <input type="text" name="company_name" id="company_name" class="form-control" placeholder="e.g. Horizon Cloud Labs" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description" class="form-label">Job Description</label>
+                <textarea name="description" id="description" class="form-control" rows="3" placeholder="Brief outline of duties and qualifications..." required></textarea>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" name="location" id="location" class="form-control" placeholder="e.g. Bangalore / Remote" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="experience_level" class="form-label">Experience Level</label>
+                    <select name="experience_level" id="experience_level" class="form-control">
+                        <option value="Fresher (0-1 yrs)">Fresher (0-1 yrs)</option>
+                        <option value="1-2 years">1-2 years</option>
+                        <option value="Internship">Internship</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="employment_type" class="form-label">Employment Type</label>
+                    <select name="employment_type" id="employment_type" class="form-control">
+                        <option value="Full-time">Full-time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Internship">Internship</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="required_education" class="form-label">Required Education</label>
+                    <input type="text" name="required_education" id="required_education" class="form-control" placeholder="e.g. B.Tech / BCA" value="Bachelor's degree in CS or related field">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="application_url" class="form-label">Application URL (Demo)</label>
+                <input type="url" name="application_url" id="application_url" class="form-control" placeholder="https://example.com/demo-careers" value="https://example.com/demo-careers">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Required Skills (Select applicable)</label>
+                <div style="max-height: 140px; overflow-y: auto; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.5rem;">
+                    {% for s in skills %}
+                        <label style="display: inline-flex; align-items: center; gap: 0.35rem; margin: 0.25rem 0.5rem; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer;">
+                            <input type="checkbox" name="skills" value="{{ s.id }}"> {{ s.skill_name }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--text-primary); font-size: 0.9rem;">
+                    <input type="checkbox" name="is_active" value="1" checked style="accent-color: var(--accent-primary); width: 16px; height: 16px;">
+                    Make Job Listing Active
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Publish Demonstration Job</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

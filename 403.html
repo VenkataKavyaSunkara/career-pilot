@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}403 Forbidden – Career Pilot{% endblock %}
+
+{% block content %}
+<div class="empty-state" style="padding: 5rem 2rem; max-width: 600px; margin: 2rem auto;">
+    <div class="empty-state-icon">🚫</div>
+    <h1 style="font-size: 2.5rem; font-weight: 800; color: #f43f5e; margin-bottom: 0.75rem;">403 Forbidden</h1>
+    <h3 style="font-size: 1.25rem; color: var(--text-primary); margin-bottom: 1rem;">Access Restricted</h3>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+        You do not possess the required administrative credentials to access this protected area.
+    </p>
+    <a href="{{ url_for('main.index') }}" class="btn btn-primary">Return to Home Page</a>
+</div>
+{% endblock %}
